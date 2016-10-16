@@ -1,0 +1,93 @@
+package com.sample
+
+//list any import classes here.
+dialect "mvel"
+
+import com.sample.IrisCep.Flower;
+
+declare Flower
+    @role( event )
+end
+
+//validator rules
+rule "Validate"
+    when
+       f: Flower (!getOriginalSpecies().equals(getClusteredSpecies()), !getClusteredSpecies().isEmpty())
+    then
+		System.out.println("Problem detected: it should be: " + f.getOriginalSpecies() + ", but it's a: " + f.getClusteredSpecies() + ". :(");
+end
+
+//setter rules
+rule "baseSet"
+	when
+		f: Flower(getPetalWidth() <= 0.6, getClusteredSpecies() == "", getClusterType() == "base.csv")
+	then
+		modify(f){
+			setClusteredSpecies("setosa");
+		}
+end
+
+rule "baseVer"
+	when
+		Flower(pw: getPetalWidth() > 0.6, getClusteredSpecies().isEmpty() == true, getClusterType() == "base.csv")
+		f: Flower (pw <= 1.7, getClusteredSpecies().isEmpty() == true)
+	then
+		modify(f){
+			setClusteredSpecies("versicolor");
+		}
+end
+
+rule "baseVir"
+	when
+		f: Flower(getPetalWidth() > 1.7, getClusteredSpecies().isEmpty() == true, getClusterType() == "base.csv")
+	then
+		modify(f){
+			setClusteredSpecies("virginica");
+		}
+end
+
+rule "part2Set"
+	when
+		f: Flower(getPetalWidth() <= 1.0, getClusteredSpecies() == "", getClusterType() == "part2.csv")
+	then
+		modify(f){
+			setClusteredSpecies("setosa");
+		}
+end
+
+rule "part2Ver"
+	when
+		f: Flower(getPetalWidth() > 1.0, getClusteredSpecies().isEmpty() == true, getClusterType() == "part2.csv")
+	then
+		modify(f){
+			setClusteredSpecies("virginica");
+		}
+end
+
+rule "data3Set"
+	when
+		f: Flower(getPetalWidth() < 1.0, getClusteredSpecies() == "", getClusterType() == "data3.csv")
+	then
+		modify(f){
+			setClusteredSpecies("setosa");
+		}
+end
+
+rule "data3Ver"
+	when
+		Flower(pw: getPetalWidth() >= 1.0, getClusteredSpecies().isEmpty() == true, getClusterType() == "data3.csv")
+		f: Flower (pw < 1.8, getClusteredSpecies().isEmpty() == true)
+	then
+		modify(f){
+			setClusteredSpecies("versicolor");
+		}
+end
+
+rule "data3Vir"
+	when
+		f: Flower(getPetalWidth() >= 1.8, getClusteredSpecies().isEmpty() == true, getClusterType() == "data3.csv")
+	then
+		modify(f){
+			setClusteredSpecies("virginica");
+		}
+end

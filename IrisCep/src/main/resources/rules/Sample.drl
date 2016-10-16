@@ -1,0 +1,43 @@
+package com.sample
+
+dialect "mvel"
+
+import com.sample.DroolsTest.Flower;
+
+declare Flower
+    @role( event )
+end
+
+global Integer x;
+/*
+rule "sepalLengthMoreThan5"
+    when
+        f : Flower( getSepalLength() > 5 , specie : getSpecie(), sepalL : getSepalLength() )
+    then
+        System.out.println( "Longer than 5: " + specie + " - " + sepalL );
+end
+
+rule "tw1"
+	when
+		//Number ( n : doubleValue ) from accumulate(f: Flower(getSepalLength() > 5) over window:time( 3s ), sum(f));
+		f: Flower(getSepalLength() > 5)// over window:time( 3s );
+	then
+		x = x+1;
+end
+*/
+/*rule "tw2"
+	when
+		//Number ( n : doubleValue ) from accumulate(f: Flower(getSepalLength() > 5) over window:time( 3s ), sum(f));
+		not (Flower(getSepalLength() > 5) over window:time( 3s ));
+	then
+		x = 0;
+end*/
+/*
+rule "tw3"
+	when
+//		f : Flower( getSepalLength() > 5)
+	then
+	//if (x>=1) 
+	System.out.println("There were more than 2 setosa in 2 seconds.");
+end
+*/

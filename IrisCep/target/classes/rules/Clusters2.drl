@@ -1,0 +1,141 @@
+package com.sample
+
+//list any import classes here.
+dialect "mvel"
+
+import com.sample.IrisCep.Flower;
+
+declare Flower
+    @role( event )
+end
+
+//validator rules
+rule "Validate2"
+    when
+       f: Flower (!getOriginalSpecies().equals(getClusteredSpecies()), !getClusteredSpecies().isEmpty())
+    then
+		System.out.println("Problem detected: it should be: " + f.getOriginalSpecies() + ", but it's a: " + f.getClusteredSpecies() + ". :(");
+end
+
+
+/*
+x1 = 5.005556, y1 = 0.3037037
+x2 = 5.850000, y2 = 1.4520000
+x3 = 6.819565, y3 = 1.9760870
+*/
+//setter rules
+rule "baseSet2"
+	when
+		Flower(pw: getPetalWidth(), sl: getSepalLength(), getClusteredSpecies().isEmpty() == true, getClusterType() == "SLbase.csv")
+		//(x-x1)2 + (y-y1)2 < (x-x2)2 + (y-y2)2
+		Flower ((((sl-5.005556)*(sl-5.005556))+((pw-0.3037037)*(pw-0.3037037))) < (((sl-5.85)*(sl-5.85))+((pw-1.452)*(pw-1.452))))
+		//(x-x1)2 + (y-y1)2 < (x-x3)2 + (y-y3)2
+		f: Flower ((((sl-5.005556)*(sl-5.005556))+((pw-0.3037037)*(pw-0.3037037))) < (((sl-6.819565)*(sl-6.819565))+((pw-1.9760870)*(pw-1.9760870))))
+	then
+		modify(f){
+			setClusteredSpecies("setosa");//1
+		}
+end
+
+rule "baseVer2a"
+	when
+		Flower(pw: getPetalWidth(), sl: getSepalLength(), getClusteredSpecies().isEmpty() == true, getClusterType() == "SLbase.csv")
+		//(x-x1)2 + (y-y1)2 < (x-x2)2 + (y-y2)2
+		Flower ((((sl-5.005556)*(sl-5.005556))+((pw-0.3037037)*(pw-0.3037037))) < (((sl-5.85)*(sl-5.85))+((pw-1.452)*(pw-1.452))))
+		//(x-x1)2 + (y-y1)2 >= (x-x3)2 + (y-y3)2
+		f: Flower ((((sl-5.005556)*(sl-5.005556))+((pw-0.3037037)*(pw-0.3037037))) >= (((sl-6.819565)*(sl-6.819565))+((pw-1.9760870)*(pw-1.9760870))))
+	then
+		modify(f){ setClusteredSpecies("virginica");}
+end
+
+rule "baseVer2b"
+	when
+		Flower(pw: getPetalWidth(), sl: getSepalLength(), getClusteredSpecies().isEmpty() == true, getClusterType() == "SLbase.csv")
+		//(x-x1)2 + (y-y1)2 >= (x-x2)2 + (y-y2)2
+		Flower ((((sl-5.005556)*(sl-5.005556))+((pw-0.3037037)*(pw-0.3037037))) >= (((sl-5.85)*(sl-5.85))+((pw-1.452)*(pw-1.452))))
+		//(x-x2)2 + (y-y2)2 >= (x-x3)2 + (y-y3)2
+		f: Flower ((((sl-5.85)*(sl-5.85))+((pw-1.452)*(pw-1.452))) >= (((sl-6.819565)*(sl-6.819565))+((pw-1.9760870)*(pw-1.9760870))))
+	then
+		modify(f){ setClusteredSpecies("virginica");}//3
+end
+
+rule "baseVir2"
+	when
+		Flower(pw: getPetalWidth(), sl: getSepalLength(), getClusteredSpecies().isEmpty() == true, getClusterType() == "SLbase.csv")
+		//(x-x1)2 + (y-y1)2 >= (x-x2)2 + (y-y2)2
+		Flower ((((sl-5.005556)*(sl-5.005556))+((pw-0.3037037)*(pw-0.3037037))) >= (((sl-5.85)*(sl-5.85))+((pw-1.452)*(pw-1.452))))
+		//(x-x2)2 + (y-y2)2 < (x-x3)2 + (y-y3)2
+		f: Flower ((((sl-5.85)*(sl-5.85))+((pw-1.452)*(pw-1.452))) < (((sl-6.819565)*(sl-6.819565))+((pw-1.9760870)*(pw-1.9760870))))
+	then
+		modify(f){
+			setClusteredSpecies("versicolor");//2
+		}
+end
+
+/*  Sepal.Length Petal.Width
+x1 = 6.518667   y1 = 1.8333333
+x2 = 5.168000   y2 = 0.5653333*/
+rule "part2Vir2"
+	when
+		Flower(pw: getPetalWidth(), sl: getSepalLength(), getClusteredSpecies().isEmpty() == true, getClusterType() == "SLpart2.csv")
+		//(x-x1)2 + (y-y1)2 < (x-x2)2 + (y-y2)2
+		f: Flower ((((sl-6.518667)*(sl-6.518667))+((pw-1.8333333)*(pw-1.8333333))) < (((sl-5.168)*(sl-5.168))+((pw-0.5653333)*(pw-0.5653333))))
+	then
+		modify(f){ setClusteredSpecies("virginica"); } //1
+end
+
+rule "part2Set2"
+	when
+		Flower(pw: getPetalWidth(), sl: getSepalLength(), getClusteredSpecies().isEmpty() == true, getClusterType() == "SLpart2.csv")
+		//(x-x1)2 + (y-y1)2 >= (x-x2)2 + (y-y2)2
+		f: Flower ((((sl-6.518667)*(sl-6.518667))+((pw-1.8333333)*(pw-1.8333333))) >= (((sl-5.168)*(sl-5.168))+((pw-0.5653333)*(pw-0.5653333))))
+	then
+		modify(f){ setClusteredSpecies("setosa"); }//2
+end
+/* Petal.Length
+x1 0.2818182
+x2 2.1705882
+x3 1.4433333*/
+rule "data3Set2"
+	when
+		Flower(sl: getPetalWidth(), getClusteredSpecies().isEmpty() == true, getClusterType() == "SLdata3.csv")
+		//(x-x1)2 < (x-x2)2
+		Flower (((sl-0.2818182)*(sl-0.2818182)) < ((sl-2.1705882)*(sl-2.1705882)))
+		//(x-x1)2 < (x-x3)2
+		f: Flower (((sl-0.2818182)*(sl-0.2818182)) < ((sl-1.4433333)*(sl-1.4433333)))
+	then
+		modify(f){ setClusteredSpecies("setosa"); }
+end
+
+rule "data3Ver2a"
+	when
+		Flower(sl: getPetalWidth(), getClusteredSpecies().isEmpty() == true, getClusterType() == "SLdata3.csv")
+		//(x-x1)2 < (x-x2)2
+		Flower (((sl-0.2818182)*(sl-0.2818182)) < ((sl-2.1705882)*(sl-2.1705882)))
+		//(x-x1)2 >= (x-x3)2
+		f: Flower (((sl-0.2818182)*(sl-0.2818182)) >= ((sl-1.4433333)*(sl-1.4433333)))
+	then
+		modify(f){ setClusteredSpecies("versicolor"); }
+end
+
+rule "data3Ver2b"
+	when
+		Flower(sl: getPetalWidth(), getClusteredSpecies().isEmpty() == true, getClusterType() == "SLdata3.csv")
+		//(x-x1)2 >= (x-x2)2
+		Flower (((sl-0.2818182)*(sl-0.2818182)) >= ((sl-2.1705882)*(sl-2.1705882)))
+		//(x-x2)2 >= (x-x3)2)
+		f: Flower (((sl-2.1705882)*(sl-2.1705882)) >= ((sl-1.4433333)*(sl-1.4433333)))
+	then
+		modify(f){ setClusteredSpecies("versicolor"); }
+end
+
+rule "data3Vir2"
+	when
+		Flower(sl: getPetalWidth(), getClusteredSpecies().isEmpty() == true, getClusterType() == "SLdata3.csv")
+		//(x-x1)2 >= (x-x2)2
+		Flower (((sl-0.2818182)*(sl-0.2818182)) >= ((sl-2.1705882)*(sl-2.1705882)))
+		//(x-x2)2 < (x-x3)2)
+		f: Flower (((sl-2.1705882)*(sl-2.1705882)) < ((sl-1.4433333)*(sl-1.4433333)))
+	then
+		modify(f){ setClusteredSpecies("virginica"); }
+end
